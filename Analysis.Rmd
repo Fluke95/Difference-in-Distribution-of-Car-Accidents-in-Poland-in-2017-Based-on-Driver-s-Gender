@@ -31,24 +31,24 @@ knitr::kable(driving_licence)
 ```
 
 ```{r total, message=FALSE, warning=FALSE}
-total_licences <- driving_licence %>% 
-  dplyr::as_tibble() %>% 
-  dplyr::group_by(gender) %>% 
-  dplyr::summarize(licences_gender_sum = sum(licences))
+total_licences <- driving_licence %>%
+    dplyr::as_tibble() %>%
+    dplyr::group_by(gender) %>%
+    dplyr::summarize(licences_gender_sum = sum(licences))
 total_licences_sum <- sum(total_licences$licences_gender_sum)
 total_licences_sum
 ```
 By the end of 2017, there were almost 21 million active driving licences in Poland.
 
 ```{r percentage, message=FALSE, warning=FALSE}
-M_licences <- total_licences %>% 
-  dplyr::filter(gender == "M") %>% 
-  .$licences_gender_sum
-F_licences <- total_licences %>% 
-  dplyr::filter(gender == "F") %>% 
-  .$licences_gender_sum
-M_licences_perc <- (M_licences / total_licences_sum)*100
-F_licences_perc <- (F_licences / total_licences_sum)*100
+M_licences <- total_licences %>%
+    dplyr::filter(gender == "M") %>%
+    .$licences_gender_sum
+F_licences <- total_licences %>%
+    dplyr::filter(gender == "F") %>%
+    .$licences_gender_sum
+M_licences_perc <- (M_licences / total_licences_sum) * 100
+F_licences_perc <- (F_licences / total_licences_sum) * 100
 ```
 
 ```{r percentage_print, echo=FALSE}
@@ -60,13 +60,14 @@ Almost 60% of them were held by males.
 
 ### Groups and Disproportions
 ```{r disporportions, echo=FALSE}
-driving_licence %>% 
-  dplyr::left_join(total_licences, by = "gender") %>% 
-  dplyr::mutate(
-    total_share = round( (licences / total_licences_sum)*100, 2),
-    group_share = round( (licences / licences_gender_sum)*100, 2)) %>% 
-  dplyr::select(-licences_gender_sum, -licences) %>% 
-  knitr::kable()
+driving_licence %>%
+    dplyr::left_join(total_licences, by = "gender") %>%
+    dplyr::mutate(
+        total_share = round((licences / total_licences_sum) * 100, 2),
+        group_share = round((licences / licences_gender_sum) * 100, 2)
+    ) %>%
+    dplyr::select(-licences_gender_sum, -licences) %>%
+    knitr::kable()
 ```
 
 As you can see, there are huge dispropotions between age and gender groups. Within female group 50% of all licences are held by the women aged 25 to 44. As we move towards older age groups, there are less and less licences there. Less than 9% of all licences held by women belong to age group above 65 years old. That's slightly more than 3% of all overall driving licences in 2017.
@@ -104,8 +105,8 @@ accidents <- c(M_accidents, F_accidents)
 no_accidents <- c(M_no_accident, F_no_accident)
 
 frequecy_table <- data.frame(
-  accident = c(F_accidents, M_accidents),
-  no_accident = c(F_no_accident, M_no_accident)
+    accident = c(F_accidents, M_accidents),
+    no_accident = c(F_no_accident, M_no_accident)
 )
 rownames(frequecy_table) <- c("F", "M")
 frequecy_table <- as.table(as.matrix(frequecy_table))
@@ -113,14 +114,20 @@ frequecy_table
 ```
 
 Then moved to the test. I wanted to check if chances of causing car accident are dependent on driver's gender. Significance level is set to 5%. Test hypotheses are as follows:  
-H0: Driver's gender has effect on chances of causing car accident.  
-H1: Driver's gender does not have effect on chances of causing car accident.  
+H0: Driver's gender has no effect on chances of causing car accident.  
+H1: Driver's gender has effect on chances of causing car accident.  
 
 ```{r test}
 chisq.test(frequecy_table)
 ```
 
 Since the p-value is very small (< 2.2e-16) and less than the significance level (0.05), we cannot accept the null hypothesis. Thus, we conclude that there is a relationship between gender and chances of causing car accident.
+
+## Limitations
+While the analysis shows a significant difference in accident rates between genders, there are some limitations to consider:
+
+1. **Exposure (Mileage)**: The most significant limitation is the lack of data regarding the annual mileage (number of kilometers driven) by each gender. Males might spend more time on the road due to professional reasons (e.g., professional drivers), which naturally increases their exposure to potential accidents. The number of driving licenses is only a proxy for exposure.
+2. **Simplified Responsibility**: The assumption that a single driver is responsible for a single accident is a simplification of complex road events, although it aligns with police reporting standards for primary fault.
 
 ## Conclusion
 Number of accidents per 10 000 drivers (16 for male, 7 for female) and chi-square test results lead to conclusion that, generally speaking, male have higher car accident rate and cause more accidents (proportionally and in absolute numbers) than female.
